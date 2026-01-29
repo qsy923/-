@@ -1,15 +1,29 @@
 {
-  "totalSeats": 150,
-  "rows": 10,
-  "seatsPerRow": 15,
-  "hallName": "IMAX巨幕厅",
+  "totalSeats": 10080,
+  "rows": 120,
+  "baseSeatsPerRow": 20,
+  "colIncrement": 0.7,
+  "hallName": "万人IMAX巨幕厅",
   "screenPosition": "north",
-  "premiumRows": ["A", "B"],
-  "vipRows": ["C", "D"],
-  "regularRows": ["E", "F", "G", "H", "I", "J"],
+  "areas": [
+    { "name": "前排优选区(1-20排)", "rowRange": [1, 20], "type": "premium", "price": 120 },
+    { "name": "中排VIP区(21-60排)", "rowRange": [21, 60], "type": "vip", "price": 90 },
+    { "name": "后排普通区(61-120排)", "rowRange": [61, 120], "type": "regular", "price": 60 }
+  ],
+  "subAreas": [
+    { "area": "premium", "subId": "P1", "name": "前排中央区", "capacity": 100 },
+    { "area": "premium", "subId": "P2", "name": "前排左侧区", "capacity": 98 },
+    { "area": "premium", "subId": "P3", "name": "前排右侧区", "capacity": 102 },
+    { "area": "vip", "subId": "V1", "name": "中排中央区", "capacity": 126 },
+    { "area": "vip", "subId": "V2", "name": "中排左侧区", "capacity": 124 },
+    { "area": "vip", "subId": "V3", "name": "中排右侧区", "capacity": 126 },
+    { "area": "regular", "subId": "R1", "name": "后排中央区", "capacity": 140 },
+    { "area": "regular", "subId": "R2", "name": "后排左侧区", "capacity": 138 },
+    { "area": "regular", "subId": "R3", "name": "后排右侧区", "capacity": 142 }
+  ],
   "aisles": [5, 10],
-  "disabledSeats": ["A1", "A2", "J14", "J15"],
-  "loveSeats": ["H7-H8", "H9-H10"],
+  "disabledSeatsCount": 100,
+  "loveSeats": ["R50-C7-R50-C8", "R50-C9-R50-C10"],
   "price": {
     "premium": 120,
     "vip": 90,
