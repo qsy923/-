@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你好吗 - 首页</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <head>
+    <!-- 原有的代码... -->
+    
+    <style>
+        /* 首页移动端优化 */
+        @media (max-width: 768px) {
+            /* 修复顶部间距 */
+            .container.mt-5.pt-4 {
+                padding-top: 80px !important;
+                margin-top: 0 !important;
+            }
+            
+            /* 调整大标题 */
+            .jumbotron h1.display-4 {
+                font-size: 2rem;
+            }
+            
+            .jumbotron p.lead {
+                font-size: 1rem;
+            }
+            
+            /* 卡片间距 */
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            /* 按钮更容易点击 */
+            .btn {
+                padding: 10px 15px;
+                min-height: 44px; /* iOS推荐最小点击区域 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-film me-2"></i>你好吗
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="fas fa-home"></i> 首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="encyclopedia.html">
+                            <i class="fas fa-book"></i> 电影科普
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="exam.html">
+                            <i class="fas fa-graduation-cap"></i> 模拟考
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ticket.html">
+                            <i class="fas fa-ticket-alt"></i> 电影抢票
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mt-5 pt-4">
+        <!-- 顶部大横幅 -->
+        <div class="jumbotron bg-light p-5 rounded-3 mb-4">
+            <h1 class="display-4">🎬 你好吗，大爆！</h1>
+            <p class="lead">清清预售加载中</p>
+            <hr class="my-4">
+        </div>
+
+        <!-- 功能卡片 -->
+        <div class="row">
+            <!-- 模拟考卡片（纯练习） -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 border-success">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-graduation-cap fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">🧠 模拟考</h5>
+                        <p class="card-text">电影知识练习</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <!-- 模拟考只做练习 -->
+                        <a href="ticket-exam.html?mode=simulate" class="btn btn-outline-success w-100 mb-2">
+                            <i class="fas fa-brain me-2"></i>开始练习
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 科普卡片（保持不变） -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-book fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">📚 电影科普</h5>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="encyclopedia.html" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-arrow-right me-2"></i>进入科普
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 答题抢票卡片（正式模式） -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 border-warning">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-ticket-alt fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title">🎫 答题抢票</h5>
+                        <p class="card-text">先答题后抢票！正确率越高，票价越优惠</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <!-- 正式答题抢票 -->
+                        <a href="ticket-exam.html?mode=real" class="btn btn-warning w-100">
+                            <i class="fas fa-ticket-alt me-2"></i>答题抢票
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 直接抢票卡片（暂不开放） -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 border-secondary">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3" id="directTicketIcon">
+                            <i class="fas fa-clock fa-3x text-secondary"></i>
+                        </div>
+                        <h5 class="card-title" id="directTicketTitle">⏳ 直接抢票</h5>
+                        <p class="card-text" id="directTicketDesc">
+                            直接抢票通道暂未开放
+                        </p>
+                        <div class="mt-2">
+                            <span class="badge bg-secondary" id="directTicketStatus">未开放</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="#" class="btn btn-outline-secondary w-100 disabled" id="directTicketBtn">
+                            <i class="fas fa-lock me-2"></i>暂未开放
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义JS -->
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <style>
+    /* 手机优化 */
+    @media (max-width: 768px) {
+        body {
+            padding-top: 70px;
+        }
+    }
+</style>
+</body>
+</html>

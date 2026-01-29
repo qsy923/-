@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "user1",
+      "name": "电影爱好者",
+      "avatar": "https://ui-avatars.com/api/?name=电影爱好者&background=4cc9f0&color=fff",
+      "joinDate": "2024-01-15",
+      "examCount": 5,
+      "highestScore": 95
+    },
+    {
+      "id": "user2",
+      "name": "科幻影迷",
+      "avatar": "https://ui-avatars.com/api/?name=科幻影迷&background=4361ee&color=fff",
+      "joinDate": "2024-01-18",
+      "examCount": 3,
+      "highestScore": 88
+    }
+  ]
+}

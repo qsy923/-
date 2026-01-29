@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电影科普 - 你好吗</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 电影科普页面专用样式 */
+        .encyclopedia-header {
+            background: linear-gradient(135deg, #63C5DE, #E1F5FA);
+            color: white;
+            padding: 60px 0 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .encyclopedia-header h1.display-4 {
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+}
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .category-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .category-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .category-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .category-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        
+        .category-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        
+        .category-badge {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        /* 弹窗样式 */
+        .modal-custom {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-custom.active {
+            display: flex;
+        }
+        
+        .modal-content-custom {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .modal-header-custom {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+        }
+        
+        .modal-title-custom {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .modal-body-custom {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+        
+        .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+        
+        .modal-text-content {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #444;
+        }
+        
+        .modal-text-content h3 {
+            color: #4361ee;
+            margin: 25px 0 15px;
+        }
+        
+        .modal-text-content p {
+            margin-bottom: 15px;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .admin-notice {
+            background: #e7f3ff;
+            border-left: 4px solid #4361ee;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content-custom {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .modal-title-custom {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-film me-2"></i>你好吗
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link text-white" href="index.html">
+                    <i class="fas fa-home me-1"></i>返回首页
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="encyclopedia-header">
+        <div class="container">
+            <h1 class="display-4 mb-3">🎬 电影科普知识库</h1>
+            <p class="lead mb-0">点击下方卡片了解电影行业专业知识</p>
+            <p class="small opacity-75">后端可随时添加和修改科普内容</p>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container mt-4">
+        <!-- 加载状态 -->
+        <div id="loadingState" class="loading-spinner" style="display: none;">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+            <p class="mt-3">正在加载科普数据...</p>
+        </div>
+
+        <!-- 科普卡片网格 -->
+        <div id="encyclopediaGrid">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4"><i class="fas fa-book-open me-2"></i>科普分类</h2>
+                    <p class="text-muted mb-4">点击卡片查看详细内容</p>
+                </div>
+            </div>
+            <div class="category-grid" id="categoryGrid">
+                <!-- 科普卡片会通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        
+
+    <!-- 弹窗 -->
+    <div id="encyclopediaModal" class="modal-custom">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h3 class="modal-title-custom" id="modalTitle">科普标题</h3>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-custom">
+                <img id="modalImage" class="modal-image" src="" alt="科普图片" style="display: none;">
+                <div class="modal-text-content" id="modalContent">
+                    <!-- 科普内容会动态填充 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 脚本 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ==================== 电影科普页面脚本 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ 电影科普页面加载完成');
+            
+            // 绑定事件
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            
+            // 点击弹窗背景关闭
+            document.getElementById('encyclopediaModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // 立即加载科普数据
+            loadEncyclopediaData();
+        });
+
+        // 当前选中的科普项
+        let currentCategory = null;
+
+        // 加载科普数据（直接使用内置数据，不依赖外部文件）
+        function loadEncyclopediaData() {
+            console.log('加载科普数据...');
+            
+            // 隐藏加载状态，直接显示内容
+            document.getElementById('loadingState').style.display = 'none';
+            
+            // 内置科普数据
+           // ⚠️ 缺少开始的方括号
+const categories = [  // ← 这里要加 [
+    {
+        id: 'fill_field',
+        title: '填场科普',
+        image: '',
+        description: '了解电影填场的相关知识',
+        content: `
+           <p>填场是指粉丝填补观影人数较少的电影场次, 拉高该场电影的上座率. 如果上座率太低, 影院出于效益目的会缩减排片. 在不挤压路人选择的前提下, 通过填场保证上座率下限, 保住现有排片.</p>
+
+    <h3>为什么要填场?</h3>
+    <p>是预售期间, 粉丝可以利用最低的成本, 实现最高的上座率, 保住排片, 将资金和精力效用最大化. 与包场相比, 填场被认为是更高效, 更可持续的支持方式.</p>
+    <ul>
+        <li>预售期间: 尽量让每个有预售的排片都要有票卖出去, 保证上映时排片不被取消.</li>
+        <li>上映期间: 专注各地商圈热门影院的排片, 如果上座率不高, 及时购买非黄金座位来保证排片.</li>
+    </ul>
+        `,
+        order: 1
+    },
+    {
+        id: 'ground_promotion',
+        title: '地推科普',
+        image: '',
+        description: '线下地推, 主要为了宣传电影, 提升猫眼, 淘票票, 豆瓣三个平台的"想看"人数.',
+        content: `
+           <img src="images/promotion/promotion.jpg" style="width: 80%;">
+        `,
+        order: 2
+    },
+    {
+        id: 'film_presale_importance',
+        title: '电影预售重要性',
+        image: '',
+        description: '-什么是预售, 预售票房?-我们为什么要冲预售票房?-冲预售, 我们可以做什么?',
+        content: `
+            <h3>预售票房的重要性</h3>
+            <p>全体重视预售票房, 全力以赴!</p>
+            
+            <p><strong>预售票房是粉丝唯一可控的有效助力</strong></p>
+            
+            <p><strong>高预售=高排片=高票房潜力</strong></p>
+            
+            <p><strong>预售情况影响口碑和宣发</strong></p>
+            
+            <p><strong>预售票房反映艺人的号召力及商业价值</strong></p>
+            
+            <p><strong>一切预算优先考虑冲预售票房</strong></p>
+            
+            <img src="images/presale/presale1.jpg" style="width: 80%;">
+            <img src="images/presale/presale2.jpg" style="width: 80%;">
+            <img src="images/presale/presale3.jpg" style="width: 80%;">
+            <img src="images/presale/presale4.jpg" style="width: 80%;">
+            <img src="images/presale/presale5.jpg" style="width: 80%;">
+        `,
+        order: 3
+    },
+    {
+        id: 'term_explanation',
+        title: '名词解释',
+        image: '',
+        description: '首发最全! 电影相关专业名词全解析!',
+        content: `
+             <h3>首发最全! 电影相关专业名词全解析</h3>
+            <p><strong>提前学习, 全力以赴!</strong></p>
+            <ul style="line-height: 2;">
+                <li>🔹 产业参与相关</li>
+                <li>🔹 档期相关</li>
+                <li>🔹 上映相关</li>
+                <li>🔹 许可, 版权与合规相关</li>
+                <li>🔹 市场数据相关</li>
+                <li>🔹 电影票相关</li>
+                <li>🔹 票房相关</li>
+                <li>🔹 票房助推行动相关</li>
+                <li>🔹 评分与口碑相关</li>
+            </ul>
+            <img src="images/explanation/explanation1.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation2.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation3.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation4.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation5.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation6.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation7.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation8.jpg" style="width: 80%;">
+            <img src="images/explanation/explanation9.jpg" style="width: 80%;">
+        `,
+        order: 5
+    },
+    {
+        id: 'douban_account_cultivation_guide',
+        title: '豆瓣养号指南',
+        image: '',
+        description: '请签收耶SIR精心打造的[史上最全豆瓣养号攻略]',
+        content: `
+           <img src="images/douban/douban1.jpg" style="width: 80%;">
+    <img src="images/douban/douban2.jpg" style="width: 80%;">
+    <img src="images/douban/douban3.jpg" style="width: 80%;">
+    <img src="images/douban/douban4.jpg" style="width: 80%;">
+    <img src="images/douban/douban5.jpg" style="width: 80%;">
+    <img src="images/douban/douban6.jpg" style="width: 80%;">
+    <img src="images/douban/douban7.jpg" style="width: 80%;">
+    <img src="images/douban/douban8.jpg" style="width: 80%;">
+    <img src="images/douban/douban9.jpg" style="width: 80%;">
+    <img src="images/douban/douban10.jpg" style="width: 80%;">
+        `,
+        order: 4
+    }
+];  // ← 这里要加 ]
+            
+            
+            // 渲染科普卡片
+            renderCategoryCards(categories);
+            
+            // 更新分类数量
+            document.getElementById('categoryCount').textContent = categories.length;
+            
+            console.log(`✅ 加载 ${categories.length} 个科普分类`);
+        }
+
+        // 渲染科普卡片
+        function renderCategoryCards(categories) {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            
+            // 按order字段排序
+            categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+            
+            categories.forEach(category => {
+                const card = createCategoryCard(category);
+                grid.appendChild(card);
+            });
+        }
+
+        // 创建科普卡片
+        function createCategoryCard(category) {
+            const card = document.createElement('div');
+            card.className = 'category-card';
+            card.dataset.id = category.id;
+            
+            // 卡片内容
+            card.innerHTML = `
+                <div class="category-image">
+                    <i class="fas fa-film fa-3x"></i>
+                </div>
+                <div class="category-content">
+                    <h4 class="category-title">${category.title}</h4>
+                    <p class="category-description">${category.description}</p>
+                    <div class="category-meta">
+                        <span class="category-badge">科普知识</span>
+                        <span class="text-muted small">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            // 点击事件
+            card.addEventListener('click', () => openModal(category));
+            
+            return card;
+        }
+
+        // 打开弹窗
+        function openModal(category) {
+            currentCategory = category;
+            
+            // 更新弹窗内容
+            document.getElementById('modalTitle').textContent = category.title;
+            
+            // 设置内容
+            document.getElementById('modalContent').innerHTML = category.content || 
+                `<p>暂无详细内容，请联系管理员添加。</p>`;
+            
+            // 显示弹窗
+            document.getElementById('encyclopediaModal').classList.add('active');
+            
+            // 防止背景滚动
+            document.body.style.overflow = 'hidden';
+            
+            // 滚动到顶部
+            const modalBody = document.querySelector('.modal-body-custom');
+            modalBody.scrollTop = 0;
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('encyclopediaModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            currentCategory = null;
+        }
+
+        // 键盘ESC键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && currentCategory) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
