@@ -1,0 +1,19 @@
+{
+  "totalSeats": 150,
+  "rows": 10,
+  "seatsPerRow": 15,
+  "hallName": "IMAX巨幕厅",
+  "screenPosition": "north",
+  "premiumRows": ["A", "B"],
+  "vipRows": ["C", "D"],
+  "regularRows": ["E", "F", "G", "H", "I", "J"],
+  "aisles": [5, 10],
+  "disabledSeats": ["A1", "A2", "J14", "J15"],
+  "loveSeats": ["H7-H8", "H9-H10"],
+  "price": {
+    "premium": 120,
+    "vip": 90,
+    "regular": 60,
+    "love": 150
+  }
+}
