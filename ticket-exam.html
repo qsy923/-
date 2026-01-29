@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答题抢票 - 你好吗</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary-color: #7209b7;
+            --success-color: #28a745;
+            --success-light: #d4edda;
+            --danger-color: #dc3545;
+            --danger-light: #f8d7da;
+            --warning-color: #ff9e00;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --gray-color: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        
+        /* 主容器 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 模式指示器 */
+        .mode-indicator {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            box-shadow: var(--box-shadow);
+            border: 3px solid white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 考试说明卡片 */
+        .exam-intro-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            border: none;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .exam-intro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .exam-intro-card .card-title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .feature-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            padding: 20px;
+            height: 100%;
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+        }
+        
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-box i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+-webkit-background-clip: text;
+background-clip: text; /* 添加标准属性 */
+-webkit-text-fill-color: transparent;
+        }
+        
+        /* 开始按钮 */
+        .start-exam-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .start-exam-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        /* 加载状态 */
+        .loading-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 60px 30px;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border-width: 6px;
+            margin: 0 auto 20px;
+        }
+        
+        /* 错误提示 */
+        .error-alert {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--box-shadow);
+            animation: shake 0.5s ease-in-out;
+            border-left: 5px solid var(--danger-color);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        
+        /* 考试状态栏 */
+        .exam-status-bar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px 30px;
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .timer-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 10px 20px;
+            border-radius: 10px;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .timer-warning {
+            color: var(--danger-color);
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .question-counter {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            background: var(--light-color);
+            padding: 8px 20px;
+            border-radius: 50px;
+        }
+        
+        /* 题目卡片 */
+        .question-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+            border-left: 5px solid var(--primary-color);
+            transition: var(--transition);
+        }
+        
+        .question-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        
+        /* 选项样式 */
+        .options-container {
+            margin-top: 20px;
+        }
+        
+        .option-item {
+            background: var(--light-color);
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .option-item:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: translateX(5px);
+        }
+        
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.1);
+        }
+        
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-weight: 700;
+            color: var(--gray-color);
+            margin-right: 15px;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        
+        .option-item.selected .option-letter {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .option-text {
+            flex: 1;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        /* 导航按钮 */
+        .exam-navigation {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+        }
+        
+        /* 完成按钮 */
+        .finish-exam-btn {
+            background: linear-gradient(135deg, var(--success-color), #20c997);
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .finish-exam-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        /* 考试结果 */
+        .result-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        
+        /* 统计信息 */
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            min-width: 150px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-top: 5px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.correct {
+            border-top-color: var(--success-color);
+        }
+        
+        .stat-card.wrong {
+            border-top-color: var(--danger-color);
+        }
+        
+        .stat-card.accuracy {
+            border-top-color: var(--info-color);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* 分数显示 */
+        .score-display {
+            font-size: 4rem;
+            font-weight: 800;
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+-webkit-background-clip: text;
+background-clip: text; /* 添加标准属性 */
+-webkit-text-fill-color: transparent;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* 价格显示 */
+        .price-section {
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            border: 3px dashed var(--primary-color);
+        }
+        
+        .price-badge {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 40px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+        }
+        
+        .price-description {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-top: 15px;
+        }
+        
+        /* 答题详情 */
+        .details-toggle-btn {
+            background: linear-gradient(135deg, var(--info-color), #0dcaf0);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: var(--transition);
+            margin: 20px 0;
+        }
+        
+        .details-toggle-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(13, 202, 240, 0.3);
+        }
+        
+        .answer-details-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: var(--box-shadow);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .details-title {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        /* 答题回顾项 */
+        .review-item {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--gray-color);
+            transition: var(--transition);
+        }
+        
+        .review-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .review-item.correct {
+            border-left-color: var(--success-color);
+            background: linear-gradient(to right, rgba(40, 167, 69, 0.03), transparent);
+        }
+        
+        .review-item.wrong {
+            border-left-color: var(--danger-color);
+            background: linear-gradient(to right, rgba(220, 53, 69, 0.03), transparent);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .question-number-badge {
+            background: var(--light-color);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge.correct {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .status-badge.wrong {
+            background: var(--danger-light);
+            color: var(--danger-color);
+        }
+        
+        .answer-info {
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+        
+        .review-question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        /* 选项回顾 */
+        .review-options {
+            margin-bottom: 20px;
+        }
+        
+        .review-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: var(--light-color);
+            transition: var(--transition);
+        }
+        
+        .review-option.correct {
+            background: var(--success-light);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .review-option.user-wrong {
+            background: var(--danger-light);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .review-option:hover {
+            transform: translateX(5px);
+        }
+        
+        .review-option-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .review-option.correct .review-option-letter {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .review-option.user-wrong .review-option-letter {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .review-option-text {
+            flex: 1;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+        
+        .option-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        
+        .option-tag.correct {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .option-tag.user {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        /* 解析框 */
+        .explanation-box {
+            background: linear-gradient(135deg, #fff9db, #ffeaa7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .explanation-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .explanation-icon {
+            color: var(--warning-color);
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+        
+        .explanation-title {
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+        
+        .explanation-content {
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        /* 结果按钮 */
+        .result-buttons {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .result-btn {
+            padding: 15px 35px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: var(--transition);
+            min-width: 180px;
+        }
+        
+        .result-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 模拟模式样式 */
+        .simulate-mode .mode-indicator {
+            background: linear-gradient(135deg, #20c997, #12b886);
+        }
+        
+        .simulate-mode .feature-box {
+            border-left-color: #20c997;
+        }
+        
+        .simulate-mode .start-exam-btn {
+            background: linear-gradient(135deg, #20c997, #12b886);
+            box-shadow: 0 5px 15px rgba(32, 201, 151, 0.3);
+        }
+        
+        .simulate-mode .question-card {
+            border-left-color: #20c997;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .exam-status-bar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .timer-container {
+                justify-content: center;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stat-card {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .result-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .price-badge {
+                font-size: 2.5rem;
+                padding: 15px 30px;
+            }
+            
+            .score-display {
+                font-size: 3rem;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* 进度指示器 */
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+            transition: var(--transition);
+        }
+        
+        .progress-dot.active {
+            background: var(--primary-color);
+            transform: scale(1.2);
+        }
+        
+        .progress-dot.answered {
+            background: var(--success-color);
+        }
+        
+        .progress-dot.current {
+            background: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+        }
+
+           /* ============ 手机优化 ============ */
+        @media (max-width: 768px) {
+            /* 修复顶部间距 */
+            .container.main-container.mt-5.pt-5 {
+                padding-top: 80px !important;
+                margin-top: 0 !important;
+            }
+            
+            /* 调整题目文字 */
+            .question-text {
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+            
+            /* 增大选项点击区域 */
+            .option-item {
+                padding: 16px 20px;
+                min-height: 60px;
+                margin-bottom: 8px;
+            }
+            
+            .option-letter {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+            
+            /* 调整分数显示 */
+            .score-display {
+                font-size: 2.5rem;
+            }
+            
+            .price-badge {
+                font-size: 2rem;
+                padding: 15px 25px;
+            }
+            
+            /* 调整统计卡片 */
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stat-card {
+                width: 100%;
+                max-width: 200px;
+                margin-bottom: 15px;
+            }
+            
+            /* 调整按钮 */
+            .result-btn {
+                width: 100%;
+                max-width: 300px;
+                margin-bottom: 10px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-film me-2"></i>你好吗电影院
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link text-white" href="index.html">
+                    <i class="fas fa-home me-1"></i>返回首页
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container main-container mt-5 pt-5">
+        <!-- 模式指示器 -->
+        <div class="text-center mb-4">
+            <div class="mode-indicator" id="modeIndicator">
+                <i class="fas fa-brain me-2"></i><span id="modeText">答题模式</span>
+            </div>
+        </div>
+
+        <!-- 考试说明 -->
+        <div id="examInstructions" class="exam-intro-card">
+            <div class="text-center">
+                <h1 class="card-title mb-4" id="examTitle">🎬 答题抢票资格测试</h1>
+                <p class="lead mb-5" id="examDescription">展示你的电影知识，赢取专属优惠</p>
+                
+                <div class="row g-4 mt-4 justify-content-center">
+    <div class="col-md-6">
+        <div class="feature-box">
+            <i class="fas fa-database"></i>
+            <h5>题目来源</h5>
+            <p class="small mb-1" id="questionSource">精选电影题库</p>
+            <small class="text-muted" id="questionFileInfo">从题库文件加载</small>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="feature-box">
+            <i class="fas fa-clock"></i>
+            <h5>限时挑战</h5>
+            <p class="small mb-1">5分钟完成挑战</p>
+            <small class="text-muted">每题20秒</small>
+        </div>
+    </div>
+</div>
+                
+                <div class="mt-5">
+                    <button class="btn start-exam-btn" id="startTicketExamBtn">
+                        <i class="fas fa-play-circle me-2"></i><span id="startButtonText">开始答题挑战</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loadingState" class="loading-container" style="display: none;">
+            <div class="spinner-border text-primary loading-spinner" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <h4 class="mt-3" id="loadingMessage">正在加载题库...</h4>
+            <p class="text-muted">请稍候，我们正在准备题目</p>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="errorAlert" class="alert alert-danger error-alert" style="display: none;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-2">加载失败</h5>
+                    <p class="mb-0" id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 考试状态栏 -->
+        <div id="examStatusBar" class="exam-status-bar" style="display: none;">
+            <div class="timer-container">
+                <i class="fas fa-clock fa-2x text-primary"></i>
+                <div>
+                    <small class="text-muted d-block">剩余时间</small>
+                    <div class="timer-display" id="timer">05:00</div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="question-counter" id="questionCounter">第 1/15 题</div>
+            </div>
+            
+            <div class="progress-indicator" id="progressIndicator"></div>
+        </div>
+
+        <!-- 考试内容 -->
+        <div id="examContent" style="display: none;">
+            <!-- 题目动态生成 -->
+        </div>
+
+        <!-- 考试导航 -->
+        <div id="examNavigation" class="exam-navigation" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <button class="btn btn-outline-primary nav-btn w-100" id="prevQuestionBtn" disabled>
+                        <i class="fas fa-arrow-left me-2"></i>上一题
+                    </button>
+                </div>
+                <div class="col-md-4 text-center">
+                    <button class="btn finish-exam-btn" id="finishExamBtn" style="display: none;">
+                        <i class="fas fa-check-circle me-2"></i>完成答题
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary nav-btn w-100" id="nextQuestionBtn">
+                        下一题 <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 考试结果 -->
+        <div id="examResult" style="display: none;">
+            <div class="result-container">
+                <h1 class="result-title" id="resultTitle">🎉 挑战完成！</h1>
+                
+                <!-- 统计信息 -->
+                <div class="stats-container">
+                    <div class="stat-card correct">
+                        <div class="stat-value" id="correctCount">0</div>
+                        <div class="stat-label">正确</div>
+                    </div>
+                    <div class="stat-card wrong">
+                        <div class="stat-value" id="wrongCount">0</div>
+                        <div class="stat-label">错误</div>
+                    </div>
+                    <div class="stat-card accuracy">
+                        <div class="stat-value" id="accuracyRate">0%</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                </div>
+                
+                <!-- 分数显示 -->
+                <div class="score-display" id="finalScore">-- 分</div>
+                
+                <!-- 正式模式显示价格 -->
+                <div class="price-section" id="priceSection" style="display: none;">
+                    <h4 class="mb-3">恭喜获得专属优惠</h4>
+                    <div class="price-badge" id="finalPrice">-- 元</div>
+                    <p class="price-description" id="priceDescription"></p>
+                </div>
+                
+                <!-- 查看答题详情按钮 -->
+                <div>
+                    <button class="btn details-toggle-btn" id="toggleDetailsBtn">
+                        <i class="fas fa-list-check me-2"></i>查看答题详情
+                    </button>
+                </div>
+                
+                <!-- 答题详情区域 -->
+                <div class="answer-details-container" id="answerDetails" style="display: none;">
+                    <h4 class="details-title">📋 答题详情分析</h4>
+                    <div id="questionsReview"></div>
+                </div>
+                
+                <!-- 提示信息 -->
+                <div class="alert alert-info mt-4" id="simulateResultMessage" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle fa-2x me-3"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">模拟考试</h6>
+                            <p class="mb-0">本次成绩仅供参考，不参与实际抢票优惠计算</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-success mt-4" id="realResultMessage" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-ticket-alt fa-2x me-3"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">抢票资格已获得</h6>
+                            <p class="mb-0" id="resultMessage">根据您的答题成绩，享受相应优惠</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="result-buttons">
+                    <button class="btn btn-primary result-btn me-md-2" id="goToSeatBtn" style="display: none;">
+                        <i class="fas fa-chair me-2"></i>前往选座
+                    </button>
+                    
+                    <button class="btn btn-success result-btn me-md-2" id="returnToHomeBtn" style="display: none;">
+                        <i class="fas fa-home me-2"></i>返回首页
+                    </button>
+                    
+                    <button class="btn btn-outline-primary result-btn" id="retryBtn">
+                        <i class="fas fa-redo me-2"></i>重新挑战
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本 -->
+    <script src="api.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ==================== 统一答题页面脚本 ====================
+        
+        // 获取模式参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode') || 'real'; // 默认正式抢票模式
+        
+        // 考试状态
+        const ticketExamState = {
+            mode: mode,
+            questions: [],
+            currentIndex: 0,
+            userAnswers: [],
+            timeLeft: 1800, // 5分钟
+            timer: null,
+            score: 0,
+            price: 0
+        };
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log(`✅ 答题页面加载完成 - 模式: ${ticketExamState.mode}`);
+            
+            // 初始化页面模式
+            initMode();
+            
+            // 绑定按钮事件
+            document.getElementById('startTicketExamBtn').addEventListener('click', startExam);
+            document.getElementById('prevQuestionBtn').addEventListener('click', prevQuestion);
+            document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
+            document.getElementById('finishExamBtn').addEventListener('click', finishExam);
+            document.getElementById('goToSeatBtn').addEventListener('click', goToSeatSelection);
+            document.getElementById('returnToHomeBtn').addEventListener('click', returnToHome);
+            document.getElementById('retryBtn').addEventListener('click', retryExam);
+            document.getElementById('toggleDetailsBtn').addEventListener('click', toggleAnswerDetails);
+        });
+
+        // 初始化模式
+        function initMode() {
+    const isRealMode = ticketExamState.mode === 'real';
+    const modeText = isRealMode ? '正式抢票' : '模拟考试';
+    
+    // 设置CSS模式类
+    document.body.className = isRealMode ? 'real-mode' : 'simulate-mode';
+    
+    // 根据模式更新文本
+    const fileName = isRealMode ? 'ticket-questions.json' : 'questions.json';
+    
+    document.getElementById('modeText').textContent = `${modeText}模式`;
+    document.getElementById('questionFileInfo').textContent = `从 ${fileName} 加载`;
+    
+    if (isRealMode) {
+        document.getElementById('examTitle').textContent = '🎬 答题抢票资格测试';
+        document.getElementById('examDescription').textContent = '展示你的电影知识，赢取专属优惠';
+        document.getElementById('questionSource').textContent = '抢票专用题库';
+        document.getElementById('startButtonText').textContent = '开始答题抢票';
+        document.getElementById('modeIndicator').innerHTML = '<i class="fas fa-ticket-alt me-2"></i>正式抢票模式';
+    } else {
+        // 模拟模式设置
+        document.getElementById('examTitle').textContent = '🧠 模拟考试';
+        document.getElementById('examDescription').textContent = '电影知识小测练习';
+        document.getElementById('questionSource').textContent = '电影知识题库';
+        document.getElementById('startButtonText').textContent = '开始模拟考试';
+        document.getElementById('modeIndicator').innerHTML = '<i class="fas fa-graduation-cap me-2"></i>模拟考试模式';
+    }
+}
+
+        // 开始考试
+        async function startExam() {
+            console.log(`开始${ticketExamState.mode === 'real' ? '正式抢票' : '模拟'}考试`);
+            
+            if (typeof API === 'undefined') {
+                showError('系统API未加载，请刷新页面');
+                return;
+            }
+            
+            try {
+                // 显示加载状态
+                document.getElementById('examInstructions').style.display = 'none';
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('errorAlert').style.display = 'none';
+                
+                const fileName = ticketExamState.mode === 'real' ? 'ticket-questions.json' : 'questions.json';
+                document.getElementById('loadingMessage').textContent = `正在加载 ${fileName}...`;
+                
+                // 从API获取题目
+                const result = await API.getExamQuestions(ticketExamState.mode, 15);
+                
+                console.log('题库加载结果:', result);
+                
+                if (result.success && result.data.questions.length > 0) {
+                    console.log(`✅ 成功加载 ${result.data.questions.length} 题`);
+                    
+                    ticketExamState.questions = result.data.questions;
+                    ticketExamState.userAnswers = new Array(ticketExamState.questions.length).fill(null);
+                    
+                    // 隐藏加载状态，显示考试界面
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('examStatusBar').style.display = 'flex';
+                    document.getElementById('examContent').style.display = 'block';
+                    document.getElementById('examNavigation').style.display = 'block';
+                    
+                    // 创建进度指示器
+                    createProgressIndicator();
+                    
+                    // 开始计时器
+                    startTimer();
+                    
+                    // 显示第一题
+                    showQuestion(0);
+                    
+                } else {
+                    showError(result.message || '题库文件加载失败');
+                }
+            } catch (error) {
+                console.error('开始考试失败:', error);
+                showError('系统错误，请刷新页面重试：' + error.message);
+            }
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('examInstructions').style.display = 'block';
+            
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorAlert').style.display = 'block';
+        }
+
+        // 创建进度指示器
+        function createProgressIndicator() {
+            const progressContainer = document.getElementById('progressIndicator');
+            progressContainer.innerHTML = '';
+            
+            for (let i = 0; i < ticketExamState.questions.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                if (i === 0) dot.classList.add('current');
+                
+                dot.addEventListener('click', () => {
+                    if (ticketExamState.userAnswers[i] !== null) {
+                        showQuestion(i);
+                    }
+                });
+                
+                progressContainer.appendChild(dot);
+            }
+        }
+
+        // 更新进度指示器
+        function updateProgressIndicator() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active', 'answered', 'current');
+                
+                if (ticketExamState.userAnswers[index] !== null) {
+                    dot.classList.add('answered');
+                }
+                
+                if (index === ticketExamState.currentIndex) {
+                    dot.classList.add('current');
+                }
+            });
+        }
+
+        // 开始计时器
+        function startTimer() {
+            clearInterval(ticketExamState.timer);
+            
+            ticketExamState.timer = setInterval(() => {
+                ticketExamState.timeLeft--;
+                updateTimerDisplay();
+                
+                if (ticketExamState.timeLeft <= 0) {
+                    clearInterval(ticketExamState.timer);
+                    finishExam(); // 时间到自动交卷
+                }
+            }, 1000);
+        }
+
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            const minutes = Math.floor(ticketExamState.timeLeft / 60);
+            const seconds = ticketExamState.timeLeft % 60;
+            const timerDisplay = document.getElementById('timer');
+            
+            timerDisplay.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 时间少于1分钟时警告
+            if (ticketExamState.timeLeft < 60) {
+                timerDisplay.classList.add('timer-warning');
+            } else {
+                timerDisplay.classList.remove('timer-warning');
+            }
+        }
+
+        // 显示题目
+        function showQuestion(index) {
+            if (index < 0 || index >= ticketExamState.questions.length) return;
+            
+            ticketExamState.currentIndex = index;
+            const question = ticketExamState.questions[index];
+            
+            // 更新题目计数器
+            document.getElementById('questionCounter').textContent = 
+                `第 ${index + 1}/${ticketExamState.questions.length} 题`;
+            
+            // 生成题目HTML
+            const questionHTML = `
+                <div class="question-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="question-number">${index + 1}</span>
+                        <h5 class="mb-0">题目 ${index + 1}</h5>
+                    </div>
+                    
+                    <div class="question-text mb-4">${question.question}</div>
+                    
+                    <div class="options-container">
+                        ${question.options.map((option, optionIndex) => {
+                            const isSelected = ticketExamState.userAnswers[index] === optionIndex;
+                            const letter = String.fromCharCode(65 + optionIndex);
+                            
+                            return `
+                                <div class="option-item ${isSelected ? 'selected' : ''}" 
+                                     onclick="selectTicketOption(${index}, ${optionIndex})">
+                                    <div class="option-letter">${letter}</div>
+                                    <div class="option-text">${option}</div>
+                                    ${isSelected ? 
+                                        '<i class="fas fa-check-circle text-primary ms-2"></i>' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('examContent').innerHTML = questionHTML;
+            
+            // 更新进度指示器
+            updateProgressIndicator();
+            
+            // 更新导航按钮状态
+            updateNavigationButtons();
+            
+            // 检查是否可以显示完成按钮
+            checkIfCanFinish();
+        }
+
+        // 选择选项（全局函数）
+        window.selectTicketOption = function(questionIndex, optionIndex) {
+            ticketExamState.userAnswers[questionIndex] = optionIndex;
+            updateProgressIndicator();
+            showQuestion(questionIndex);
+        };
+
+        // 更新导航按钮状态
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevQuestionBtn');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+            const finishBtn = document.getElementById('finishExamBtn');
+            
+            prevBtn.disabled = ticketExamState.currentIndex === 0;
+            
+            // 如果是最后一题
+            if (ticketExamState.currentIndex === ticketExamState.questions.length - 1) {
+                nextBtn.innerHTML = '最后一题';
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.innerHTML = '下一题 <i class="fas fa-arrow-right ms-2"></i>';
+                nextBtn.disabled = false;
+            }
+            
+            // 检查是否所有题目都已作答
+            const allAnswered = ticketExamState.userAnswers.every(answer => answer !== null);
+            if (allAnswered) {
+                finishBtn.style.display = 'block';
+                nextBtn.disabled = true;
+            } else {
+                finishBtn.style.display = 'none';
+            }
+        }
+
+        // 上一题
+        function prevQuestion() {
+            if (ticketExamState.currentIndex > 0) {
+                showQuestion(ticketExamState.currentIndex - 1);
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (ticketExamState.currentIndex < ticketExamState.questions.length - 1) {
+                showQuestion(ticketExamState.currentIndex + 1);
+            }
+        }
+
+        // 检查是否可以完成答题
+        function checkIfCanFinish() {
+            const allAnswered = ticketExamState.userAnswers.every(answer => answer !== null);
+            const finishBtn = document.getElementById('finishExamBtn');
+            
+            if (allAnswered) {
+                finishBtn.style.display = 'block';
+                document.getElementById('nextQuestionBtn').disabled = true;
+            }
+        }
+
+        // 完成考试
+        async function finishExam() {
+            // 停止计时器
+            clearInterval(ticketExamState.timer);
+            
+            // 检查未作答的题目
+            const unansweredQuestions = ticketExamState.userAnswers
+                .map((answer, index) => answer === null ? index + 1 : null)
+                .filter(index => index !== null);
+            
+            if (unansweredQuestions.length > 0) {
+                const confirmMsg = `还有 ${unansweredQuestions.length} 题未作答，确定要交卷吗？`;
+                if (!confirm(confirmMsg)) {
+                    startTimer(); // 重新开始计时
+                    return;
+                }
+            }
+            
+            try {
+                // 显示加载状态
+                document.getElementById('loadingMessage').textContent = '正在计算成绩...';
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('examContent').style.display = 'none';
+                document.getElementById('examNavigation').style.display = 'none';
+                document.getElementById('examStatusBar').style.display = 'none';
+                
+                // 准备提交数据
+                const submitData = ticketExamState.userAnswers.map((answer, index) => ({
+                    questionId: ticketExamState.questions[index].id,
+                    userAnswer: answer
+                }));
+                
+                // 提交答案到API
+                const result = await API.submitExam(
+                    ticketExamState.mode, 
+                    submitData, 
+                    ticketExamState.questions
+                );
+                
+                document.getElementById('loadingState').style.display = 'none';
+                
+                if (result.success) {
+                    ticketExamState.score = result.data.score;
+                    
+                    // 如果是正式模式，获取价格
+                    if (ticketExamState.mode === 'real') {
+                        ticketExamState.price = result.data.price || getPriceByScore(ticketExamState.score);
+                    }
+                    
+                    // 生成答题详情
+                    if (result.data.questionDetails) {
+                        generateAnswerDetails(result.data.questionDetails);
+                    } else {
+                        // 如果API没有返回详情，本地生成
+                        generateAnswerDetailsLocally();
+                    }
+                    
+                    showExamResult();
+                } else {
+                    // 使用本地计算的分数
+                    calculateScoreAndShowResult();
+                }
+            } catch (error) {
+                console.error('提交失败:', error);
+                document.getElementById('loadingState').style.display = 'none';
+                calculateScoreAndShowResult();
+            }
+        }
+
+        // 计算分数并显示结果（本地计算）
+        function calculateScoreAndShowResult() {
+            ticketExamState.score = calculateScore();
+            if (ticketExamState.mode === 'real') {
+                ticketExamState.price = getPriceByScore(ticketExamState.score);
+            }
+            generateAnswerDetailsLocally();
+            showExamResult();
+        }
+
+        // 计算分数
+        function calculateScore() {
+            let correctCount = 0;
+            
+            ticketExamState.questions.forEach((question, index) => {
+                const userAnswer = ticketExamState.userAnswers[index];
+                if (userAnswer !== null && userAnswer === question.correctAnswer) {
+                    correctCount++;
+                }
+            });
+            
+            return Math.round((correctCount / ticketExamState.questions.length) * 100);
+        }
+
+        // 根据分数获取价格（正式模式）
+        function getPriceByScore(score) {
+            if (score >= 95) return 9.9;
+            if (score >= 90) return 12.9;
+            if (score >= 85) return 14.9;
+            if (score >= 80) return 17.9;
+            if (score >= 70) return 22.9;
+            if (score >= 60) return 27.9;
+            return 49.9;
+        }
+
+        // 获取价格消息
+        function getPriceMessage(score, price) {
+            if (score >= 95) return `🎉 太厉害了！几乎全对，获得超级优惠价`;
+            if (score >= 90) return `👍 优秀！电影知识达人，获得粉丝优惠价`;
+            if (score >= 85) return `👏 不错！展现了扎实的电影知识，获得优惠价`;
+            if (score >= 80) return `✓ 良好！对电影有一定了解，获得优惠价`;
+            if (score >= 70) return `✓ 还行！基本了解电影知识，获得优惠价`;
+            if (score >= 60) return `✓ 及格！达到了基本要求，获得标准价`;
+            return `💪 继续努力！电影知识需要加强，原价`;
+        }
+
+        // 本地生成答题详情
+        function generateAnswerDetailsLocally() {
+            const questionDetails = ticketExamState.questions.map((question, index) => {
+                const userAnswer = ticketExamState.userAnswers[index];
+                const isCorrect = userAnswer !== null && userAnswer === question.correctAnswer;
+                
+                return {
+                    questionText: question.question,
+                    options: question.options,
+                    correctAnswer: question.correctAnswer,
+                    userAnswer: userAnswer,
+                    isCorrect: isCorrect,
+                    explanation: question.explanation || '暂无解析'
+                };
+            });
+            
+            generateAnswerDetails(questionDetails);
+        }
+
+        // 生成答题详情
+        function generateAnswerDetails(questionDetails) {
+            // 更新统计信息
+            const correctCount = questionDetails.filter(q => q.isCorrect).length;
+            const wrongCount = questionDetails.length - correctCount;
+            const accuracy = ((correctCount / questionDetails.length) * 100).toFixed(1);
+            
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('wrongCount').textContent = wrongCount;
+            document.getElementById('accuracyRate').textContent = accuracy + '%';
+            
+            // 生成详细的答题回顾
+            const reviewHTML = questionDetails.map((detail, index) => {
+                const isCorrect = detail.isCorrect;
+                const userAnswerChar = detail.userAnswer !== null ? 
+                    String.fromCharCode(65 + detail.userAnswer) : '未作答';
+                const correctAnswerChar = String.fromCharCode(65 + detail.correctAnswer);
+                
+                // 生成选项
+                const optionsHTML = detail.options.map((option, optIndex) => {
+                    const isCorrectAnswer = optIndex === detail.correctAnswer;
+                    const isUserAnswer = optIndex === detail.userAnswer;
+                    let optionClass = '';
+                    let tagHTML = '';
+                    
+                    if (isCorrectAnswer && isUserAnswer) {
+                        optionClass = 'correct';
+                        tagHTML = '<span class="option-tag correct ms-2">✓ 您的选择</span>';
+                    } else if (isCorrectAnswer) {
+                        optionClass = 'correct';
+                        tagHTML = '<span class="option-tag correct ms-2">正确答案</span>';
+                    } else if (isUserAnswer && !isCorrect) {
+                        optionClass = 'user-wrong';
+                        tagHTML = '<span class="option-tag user ms-2">✗ 您的选择</span>';
+                    }
+                    
+                    const letter = String.fromCharCode(65 + optIndex);
+                    
+                    return `
+                        <div class="review-option ${optionClass}">
+                            <div class="review-option-letter">${letter}</div>
+                            <div class="review-option-text">${option}</div>
+                            ${tagHTML}
+                        </div>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="review-item ${isCorrect ? 'correct' : 'wrong'}">
+                        <div class="review-header">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="question-number-badge">第 ${index + 1} 题</span>
+                                <span class="status-badge ${isCorrect ? 'correct' : 'wrong'}">
+                                    ${isCorrect ? '✅ 回答正确' : '❌ 回答错误'}
+                                </span>
+                            </div>
+                            <div class="answer-info">
+                                正确答案: <strong>${correctAnswerChar}</strong> | 
+                                您的选择: <strong>${userAnswerChar}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="review-question">${detail.questionText}</div>
+                        
+                        <div class="review-options">
+                            ${optionsHTML}
+                        </div>
+                        
+                        ${detail.explanation ? `
+                            <div class="explanation-box">
+                                <div class="explanation-header">
+                                    <i class="fas fa-lightbulb explanation-icon"></i>
+                                    <span class="explanation-title">知识解析</span>
+                                </div>
+                                <div class="explanation-content mt-2">
+                                    ${detail.explanation}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('questionsReview').innerHTML = reviewHTML;
+        }
+
+        // 切换答题详情显示
+        function toggleAnswerDetails() {
+            const detailsDiv = document.getElementById('answerDetails');
+            const toggleBtn = document.getElementById('toggleDetailsBtn');
+            const icon = toggleBtn.querySelector('i');
+            
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+                icon.className = 'fas fa-eye-slash me-2';
+                toggleBtn.innerHTML = '<i class="fas fa-eye-slash me-2"></i>隐藏答题详情';
+            } else {
+                detailsDiv.style.display = 'none';
+                icon.className = 'fas fa-list-check me-2';
+                toggleBtn.innerHTML = '<i class="fas fa-list-check me-2"></i>查看答题详情';
+            }
+        }
+
+        // 显示考试结果
+        function showExamResult() {
+            // 隐藏考试界面
+            document.getElementById('examStatusBar').style.display = 'none';
+            document.getElementById('examContent').style.display = 'none';
+            document.getElementById('examNavigation').style.display = 'none';
+            
+            // 更新结果显示
+            document.getElementById('finalScore').textContent = ticketExamState.score + ' 分';
+            
+            // 根据不同模式显示不同结果
+            if (ticketExamState.mode === 'real') {
+                // 正式抢票模式
+                document.getElementById('resultTitle').textContent = '🎉 抢票资格获取成功！';
+                document.getElementById('resultMessage').textContent = getPriceMessage(ticketExamState.score, ticketExamState.price);
+                
+                // 显示价格部分
+                document.getElementById('priceSection').style.display = 'block';
+                document.getElementById('finalPrice').textContent = '¥ ' + ticketExamState.price.toFixed(1);
+                document.getElementById('priceDescription').textContent = getPriceMessage(ticketExamState.score, ticketExamState.price);
+                
+                // 显示正式模式消息
+                document.getElementById('realResultMessage').style.display = 'block';
+                document.getElementById('simulateResultMessage').style.display = 'none';
+                
+                // 显示前往选座按钮
+                document.getElementById('goToSeatBtn').style.display = 'inline-block';
+                document.getElementById('returnToHomeBtn').style.display = 'none';
+            } else {
+                // 模拟考模式
+                document.getElementById('resultTitle').textContent = '🧠 模拟考试完成！';
+                
+                // 隐藏价格部分
+                document.getElementById('priceSection').style.display = 'none';
+                
+                // 显示模拟模式消息
+                document.getElementById('realResultMessage').style.display = 'none';
+                document.getElementById('simulateResultMessage').style.display = 'block';
+                
+                // 显示返回首页按钮
+                document.getElementById('goToSeatBtn').style.display = 'none';
+                document.getElementById('returnToHomeBtn').style.display = 'inline-block';
+            }
+            
+            // 显示结果
+            document.getElementById('examResult').style.display = 'block';
+            
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 前往选座（正式模式）
+        function goToSeatSelection() {
+            // 跳转到抢票页，带上分数和价格
+            window.location.href = `ticket.html?mode=exam&score=${ticketExamState.score}&price=${ticketExamState.price}`;
+        }
+
+        // 返回首页（模拟模式）
+        function returnToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // 重新答题
+        function retryExam() {
+            // 重新加载页面，保持模式
+            window.location.href = `ticket-exam.html?mode=${ticketExamState.mode}`;
+        }
+    </script>
+</body>
+</html>

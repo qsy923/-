@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>粉丝测试 - 你好吗</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        
+        .option-item {
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-item:hover {
+            border-color: #4361ee;
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .option-item.selected {
+            border-color: #4361ee;
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4361ee;
+        }
+        
+        .result-card {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-display {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+    .option-item { padding: 16px 12px; min-height: 50px; }
+    .score-display { font-size: 2.5rem; }
+    .timer { font-size: 1.2rem; }
+    .question-card { padding: 16px; }
+}
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-film me-2"></i>你好吗
+            </a>
+            <a class="nav-link text-white" href="index.html">
+                <i class="fas fa-home me-1"></i>返回首页
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mt-5 pt-4">
+  <!-- 考试说明 -->
+<div id="examInstructions" class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title"><i class="fas fa-info-circle me-2"></i>考试说明</h4>
+        <ul class="mb-0">
+            <li>本次考试从 <span class="fw-bold">模拟考试题库</span> 随机抽取题目</li>
+            <li>每题 <span class="fw-bold">20</span> 分，总分 100 分</li>
+            <li>考试时间 <span class="fw-bold">10</span> 分钟</li>
+            <li>得分越高，抢票时享受的优惠越大</li>
+            <li><span class="text-success">全对（100分）</span> → 粉丝优惠价 9.9元</li>
+            <li><span class="text-info">高分（80-99分）</span> → 粉丝价 19.9元</li>
+            <li><span class="text-warning">及格（60-79分）</span> → 标准价 29.9元</li>
+            <li><span class="text-danger">不及格（<60分）</span> → 原价 49.9元</li>
+        </ul>
+        <div class="text-center mt-3">
+            <button class="btn btn-primary btn-lg" id="startExamBtn">
+                <i class="fas fa-play me-2"></i>开始考试
+            </button>
+        </div>
+    </div>
+</div>
+
+        <!-- 考试状态栏 -->
+        <div id="examStatusBar" class="mb-4" style="display: none;">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="timer" id="timer">10:00</div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h5 id="questionCounter">第 1/5 题</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- 考试内容 -->
+        <div id="examContent" style="display: none;">
+            <!-- 题目会动态生成 -->
+        </div>
+
+        <!-- 考试导航 -->
+        <div id="examNavigation" class="mt-4" style="display: none;">
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-outline-primary w-100" id="prevQuestionBtn" disabled>
+                        <i class="fas fa-arrow-left me-2"></i>上一题
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-primary w-100" id="nextQuestionBtn">
+                        下一题 <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <button class="btn btn-success btn-lg" id="finishExamBtn" style="display: none;">
+                    <i class="fas fa-check-circle me-2"></i>完成答题，查看成绩
+                </button>
+            </div>
+        </div>
+      
+        <!-- 考试结果 -->
+        <div id="examResult" class="result-card" style="display: none;">
+            <div id="resultContent">
+                <!-- 结果会动态生成 -->
+            </div>
+        </div>
+    </div>
+
+   
+
+    <!-- 脚本 -->
+    <!-- 先加载api.js -->
+    <script src="api.js"></script>
+    <!-- 再加载bootstrap -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ==================== 考试页面脚本 ====================
+         // 检查API是否加载的函数
+        function checkAPI() {
+            if (typeof API === 'undefined') {
+                console.error('❌ API未定义');
+                alert('系统初始化失败，请刷新页面重试');
+                return false;
+            }
+            return true;
+        }
+        // 考试状态
+        let examState = {
+            questions: [],
+            currentIndex: 0,
+            userAnswers: [],
+            timeLeft: 1800, // 10分钟
+            timer: null,
+            isCompleted: false,
+            score: 0
+        };
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ 考试页面加载完成');
+            
+            // 绑定按钮事件
+            document.getElementById('startExamBtn').addEventListener('click', startExam);
+            document.getElementById('prevQuestionBtn').addEventListener('click', prevQuestion);
+            document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
+            document.getElementById('finishExamBtn').addEventListener('click', finishExam);
+        });
+
+       // 开始考试
+async function startExam() {
+    console.log('开始考试');
+    // 再次检查API
+    if (!checkAPI()) return;
+    try {
+        // 1. 从API获取题目 - 修改这行
+        const result = await API.getExamQuestions('simulate', 15);  // ✅ 使用新方法
+        
+        if (result.success && result.data.questions.length > 0) {
+            examState.questions = result.data.questions;
+            examState.userAnswers = new Array(examState.questions.length).fill(null);
+            
+            // 2. 隐藏说明，显示考试界面
+            document.getElementById('examInstructions').style.display = 'none';
+            document.getElementById('examStatusBar').style.display = 'block';
+            document.getElementById('examContent').style.display = 'block';
+            document.getElementById('examNavigation').style.display = 'block';
+            
+            // 3. 开始计时器
+            startTimer();
+            
+            // 4. 显示第一题
+            showQuestion(0);
+            
+        } else {
+            // 显示更具体的错误信息
+            alert(`无法加载题目: ${result.message || '未知错误'}，请检查 data/questions.json 文件`);
+            console.error('加载题目失败:', result);
+        }
+    } catch (error) {
+        console.error('开始考试失败:', error);
+        alert('考试系统出现错误，请稍后重试');
+    }
+}
+
+        // 开始计时器
+        function startTimer() {
+            clearInterval(examState.timer);
+            
+            examState.timer = setInterval(() => {
+                examState.timeLeft--;
+                updateTimerDisplay();
+                
+                if (examState.timeLeft <= 0) {
+                    clearInterval(examState.timer);
+                    finishExam(); // 时间到自动交卷
+                }
+            }, 1000);
+        }
+
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            const minutes = Math.floor(examState.timeLeft / 60);
+            const seconds = examState.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 时间少于1分钟时变红色
+            if (examState.timeLeft < 60) {
+                document.getElementById('timer').className = 'timer text-danger';
+            }
+        }
+
+        // 显示题目
+        function showQuestion(index) {
+            if (index < 0 || index >= examState.questions.length) return;
+            
+            examState.currentIndex = index;
+            const question = examState.questions[index];
+            
+            // 更新题目计数器
+            document.getElementById('questionCounter').textContent = 
+                `第 ${index + 1}/${examState.questions.length} 题`;
+            
+            // 生成题目HTML
+            const questionHTML = `
+                <div class="question-card">
+                    <h4 class="mb-4">${index + 1}. ${question.question}</h4>
+                    
+                    <div class="options-list">
+                        ${question.options.map((option, optionIndex) => {
+                            const isSelected = examState.userAnswers[index] === optionIndex;
+                            return `
+                                <div class="option-item ${isSelected ? 'selected' : ''}" 
+                                     onclick="selectOption(${index}, ${optionIndex})">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_${index}" 
+                                               ${isSelected ? 'checked' : ''}>
+                                        <label class="form-check-label w-100">
+                                            ${String.fromCharCode(65 + optionIndex)}. ${option}
+                                        </label>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('examContent').innerHTML = questionHTML;
+            
+            // 更新导航按钮状态
+            updateNavigationButtons();
+            
+            // 检查是否可以显示完成按钮
+            checkIfCanFinish();
+        }
+
+        // 选择选项（全局函数）
+        window.selectOption = function(questionIndex, optionIndex) {
+            examState.userAnswers[questionIndex] = optionIndex;
+            showQuestion(questionIndex);
+        };
+
+        // 更新导航按钮状态
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevQuestionBtn');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+            
+            prevBtn.disabled = examState.currentIndex === 0;
+            nextBtn.disabled = examState.currentIndex === examState.questions.length - 1;
+            
+            // 如果是最后一题，修改按钮文字
+            if (examState.currentIndex === examState.questions.length - 1) {
+                nextBtn.innerHTML = '最后一题';
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.innerHTML = '下一题 <i class="fas fa-arrow-right ms-2"></i>';
+            }
+        }
+
+        // 上一题
+        function prevQuestion() {
+            if (examState.currentIndex > 0) {
+                showQuestion(examState.currentIndex - 1);
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (examState.currentIndex < examState.questions.length - 1) {
+                showQuestion(examState.currentIndex + 1);
+            }
+        }
+
+        // 检查是否可以完成答题
+        function checkIfCanFinish() {
+            const allAnswered = examState.userAnswers.every(answer => answer !== null);
+            if (allAnswered) {
+                document.getElementById('finishExamBtn').style.display = 'block';
+            }
+        }
+
+       // 完成答题
+async function finishExam() {
+    // 停止计时器
+    clearInterval(examState.timer);
+    
+    // 检查未作答的题目
+    const unansweredQuestions = examState.userAnswers
+        .map((answer, index) => answer === null ? index + 1 : null)
+        .filter(index => index !== null);
+    
+    if (unansweredQuestions.length > 0) {
+        if (!confirm(`还有 ${unansweredQuestions.length} 题未作答，确定要交卷吗？`)) {
+            startTimer(); // 重新开始计时
+            return;
+        }
+    }
+    
+    // 计算分数
+    examState.score = calculateScore();
+    examState.isCompleted = true;
+    
+    try {
+        // 提交答案到API - 修改这行
+        const submitData = examState.userAnswers.map((answer, index) => ({
+            questionId: examState.questions[index].id,
+            userAnswer: answer
+        }));
+        
+        const result = await API.submitExam('simulate', submitData);  // ✅ 使用新方法
+        
+        if (result.success) {
+            showExamResult(result.data);
+        } else {
+            // 使用本地计算的分数
+            showExamResult({
+                score: examState.score,
+                correctCount: getCorrectCount(examState.score, examState.questions.length),
+                totalQuestions: examState.questions.length,
+                price: getPriceByScore(examState.score),
+                message: '考试完成！'
+            });
+        }
+    } catch (error) {
+        console.error('提交失败:', error);
+        showExamResult({
+            score: examState.score,
+            correctCount: getCorrectCount(examState.score, examState.questions.length),
+            totalQuestions: examState.questions.length,
+            price: getPriceByScore(examState.score),
+            message: '考试完成！'
+        });
+    }
+}
+
+// 添加辅助函数：根据分数计算答对题数
+function getCorrectCount(score, totalQuestions) {
+    return Math.round((score / 100) * totalQuestions);
+}
+
+        // 计算分数
+        function calculateScore() {
+            let correctCount = 0;
+            
+            examState.questions.forEach((question, index) => {
+                const userAnswer = examState.userAnswers[index];
+                if (userAnswer !== null && userAnswer === question.correctAnswer) {
+                    correctCount++;
+                }
+            });
+            
+            return Math.round((correctCount / examState.questions.length) * 100);
+        }
+
+        // 根据分数获取价格
+        function getPriceByScore(score) {
+            if (score >= 95) return 9.9;
+            if (score >= 80) return 19.9;
+            if (score >= 60) return 29.9;
+            return 49.9;
+        }
+
+        // 显示考试结果
+        function showExamResult(resultData) {
+            console.log('显示考试结果:', resultData);
+            
+            // 隐藏考试界面
+            document.getElementById('examStatusBar').style.display = 'none';
+            document.getElementById('examContent').style.display = 'none';
+            document.getElementById('examNavigation').style.display = 'none';
+            
+            // 生成结果HTML
+            const resultHTML = `
+                <div class="mb-4">
+                    <i class="fas fa-trophy fa-4x text-warning"></i>
+                    <h2 class="mt-3">🎉 考试完成！</h2>
+                </div>
+                
+                <div class="score-display">${resultData.score}分</div>
+                
+                <div class="mb-4">
+                    <p>答对 <span class="fw-bold">${resultData.correctCount}</span> 题 / 共 ${resultData.totalQuestions} 题</p>
+                    <p>正确率：<span class="fw-bold">${Math.round((resultData.correctCount / resultData.totalQuestions) * 100)}%</span></p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>你的抢票优惠：</h5>
+                    <div class="h2 text-success">${resultData.price.toFixed(1)} 元</div>
+                    <p class="mt-2">${getPriceMessage(resultData.score)}</p>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg me-3" onclick="goToTicket(${resultData.score})">
+                        <i class="fas fa-ticket-alt me-2"></i>前往抢票
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg" onclick="location.reload()">
+                        <i class="fas fa-redo me-2"></i>重新考试
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('resultContent').innerHTML = resultHTML;
+            document.getElementById('examResult').style.display = 'block';
+        }
+
+        // 获取价格提示消息
+        function getPriceMessage(score) {
+            if (score >= 95) return '🎉 恭喜全对！获得粉丝专属优惠价';
+            if (score >= 80) return '👍 优秀！获得粉丝优惠价';
+            if (score >= 60) return '👏 不错！获得标准票价';
+            return '💪 继续努力，多看多学电影知识';
+        }
+
+        // 跳转到抢票页
+        window.goToTicket = function(score) {
+            window.location.href = `ticket.html?mode=exam&score=${score}`;
+        };
+    </script>
+</body>
+</html>
